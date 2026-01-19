@@ -1,0 +1,6 @@
+{
+  "country": "Nigeria",
+  "identity_parameters": ["BVN", "NIN"],
+  "receipt_required": true,
+  "mortgage_dependency": true
+}
