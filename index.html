@@ -1,32 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>COMET OS Receipt Verifier</title>
+  <title>COMET OS – Proof Engine</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
-<h2>COMET OS – QR Receipt Verification</h2>
-<p>Paste receipt payload below:</p>
 
+<h2>COMET OS – Receipt Generator & Verifier</h2>
+
+<h3>1. Generate Receipt</h3>
+<label>Funder Name:</label><br>
+<input id="funder"><br><br>
+
+<label>Amount:</label><br>
+<input id="amount" type="number"><br><br>
+
+<label>Purpose:</label><br>
+<input id="purpose"><br><br>
+
+<button onclick="generate()">Generate Receipt</button>
+
+<pre id="output"></pre>
+<div id="qrcode"></div>
+
+<hr>
+
+<h3>2. Verify Receipt</h3>
 <textarea id="payload" rows="10" cols="60"></textarea><br><br>
 <button onclick="verify()">Verify</button>
 
 <p id="result"></p>
 
 <script>
-function sha256(str) {
-  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))
-    .then(buf => Array.from(new Uint8Array(buf))
-    .map(x => x.toString(16).padStart(2, '0')).join(''));
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+async function generate() {
+  const receipt = {
+    funder: document.getElementById("funder").value,
+    amount: document.getElementById("amount").value,
+    purpose: document.getElementById("purpose").value,
+    timestamp: new Date().toISOString()
+  };
+
+  const hash = await sha256(JSON.stringify(receipt, Object.keys(receipt).sort()));
+  receipt.hash = hash;
+
+  const payload = JSON.stringify(receipt, null, 2);
+  document.getElementById("output").innerText = payload;
+  document.getElementById("payload").value = payload;
+
+  document.getElementById("qrcode").innerHTML = "";
+  new QRCode(document.getElementById("qrcode"), payload);
 }
 
 async function verify() {
   let data = JSON.parse(document.getElementById("payload").value);
   let hash = data.hash;
   delete data.hash;
+
   let recalculated = await sha256(JSON.stringify(data, Object.keys(data).sort()));
   document.getElementById("result").innerText =
-    (hash === recalculated) ? "RECEIPT VALID" : "INVALID RECEIPT";
+    (hash === recalculated) ? "✅ RECEIPT VALID" : "❌ RECEIPT INVALID";
 }
 </script>
+
 </body>
 </html>
