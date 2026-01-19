@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COMET OS – Receipt</title>
+</head>
+<body>
+    <h2>QR EMBEDDED RECEIPT</h2>
+
+    <p><strong>Name:</strong> {{ receipt.name }}</p>
+    <p><strong>BVN:</strong> {{ receipt.bvn }}</p>
+    <p><strong>NIN:</strong> {{ receipt.nin }}</p>
+    <p><strong>Amount:</strong> ₦{{ receipt.amount }}</p>
+    <p><strong>Status:</strong> {{ message }}</p>
+
+    <img src="/{{ receipt.qr_path }}" width="300">
+
+    <p>
+        This receipt is immutable, repeatable, and independently verifiable.
+    </p>
+</body>
+</html>
