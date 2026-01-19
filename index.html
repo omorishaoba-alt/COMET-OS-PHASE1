@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>COMET OS Receipt Verifier</title>
+</head>
+<body>
+<h2>COMET OS – QR Receipt Verification</h2>
+<p>Paste receipt payload below:</p>
+
+<textarea id="payload" rows="10" cols="60"></textarea><br><br>
+<button onclick="verify()">Verify</button>
+
+<p id="result"></p>
+
+<script>
+function sha256(str) {
+  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))
+    .then(buf => Array.from(new Uint8Array(buf))
+    .map(x => x.toString(16).padStart(2, '0')).join(''));
+}
+
+async function verify() {
+  let data = JSON.parse(document.getElementById("payload").value);
+  let hash = data.hash;
+  delete data.hash;
+  let recalculated = await sha256(JSON.stringify(data, Object.keys(data).sort()));
+  document.getElementById("result").innerText =
+    (hash === recalculated) ? "RECEIPT VALID" : "INVALID RECEIPT";
+}
+</script>
+</body>
+</html>
